@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Bank Exam Quiz</title>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f6f9;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+}
+
+h1{
+    text-align:center;
+}
+
+/* ========================= */
+/* TIMER AREA */
+/* ========================= */
+
+#timer-container{
+    position:sticky;
+    top:0;
+    z-index:100;
+    background:#f4f6f9;
+    padding-bottom:10px;
+}
+
+#timer{
+    background:#222;
+    color:white;
+    padding:15px;
+    text-align:center;
+    font-size:22px;
+    border-radius:10px;
+    margin-bottom:10px;
+}
+
+.timer-buttons{
+    text-align:center;
+}
+
+#pauseBtn,
+#resumeBtn{
+    padding:10px 20px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+    margin:5px;
+}
+
+#pauseBtn{
+    background:#ff9800;
+    color:white;
+}
+
+#resumeBtn{
+    background:#28a745;
+    color:white;
+}
+
+.question{
+    background:white;
+    padding:20px;
+    margin-bottom:20px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+.question h3{
+    margin-bottom:15px;
+}
+
+.option{
+    display:block;
+    padding:12px;
+    margin:10px 0;
+    border:1px solid #ccc;
+    border-radius:8px;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.option:hover{
+    background:#f0f0f0;
+}
+
+.selected{
+    background:#cfe2ff;
+    border:2px solid #0d6efd;
+}
+
+.mark-btn{
+    margin-top:10px;
+    padding:8px 15px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:#ff9800;
+    color:white;
+}
+
+.marked{
+    background:#ffcc80 !important;
+}
+
+.review-marked{
+    background:#e0e0e0 !important;
+    border:2px solid #9e9e9e;
+}
+
+.clear-btn{
+    margin-top:10px;
+    margin-left:10px;
+    padding:8px 15px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:#dc3545;
+    color:white;
+}
+
+.submit-btn{
+    width:100%;
+    padding:15px;
+    font-size:20px;
+    border:none;
+    border-radius:10px;
+    background:#28a745;
+    color:white;
+    cursor:pointer;
+    margin-top:20px;
+}
+
+.result-box{
+    background:white;
+    padding:30px;
+    border-radius:12px;
+    text-align:center;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+.review-btn{
+    padding:12px 20px;
+    margin-top:20px;
+    border:none;
+    border-radius:10px;
+    background:#007bff;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+}
+
+.review-question{
+    background:white;
+    padding:20px;
+    margin:20px 0;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+.correct{
+    color:green;
+    font-weight:bold;
+}
+
+.wrong{
+    color:red;
+    font-weight:bold;
+}
+
+.unanswered{
+    color:orange;
+    font-weight:bold;
+}
+
+.correct-answer{
+    background:#d4edda;
+    padding:10px;
+    border-radius:8px;
+    margin-top:10px;
+}
+
+.disabled-option{
+    pointer-events:none;
+    opacity:0.6;
+}
+
+.disabled-btn{
+    opacity:0.6;
+    cursor:not-allowed;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Bank Exam MCQ Quiz</h1>
+
+<!-- ========================= -->
+<!-- TIMER -->
+<!-- ========================= -->
+
+<div id="timer-container">
+
+    <div id="timer">
+        Time Left: 20:00
+    </div>
+
+    <div class="timer-buttons">
+
+        <button id="pauseBtn" onclick="pauseTimer()">
+            Pause
+        </button>
+
+        <button id="resumeBtn" onclick="resumeTimer()" disabled>
+            Resume
+        </button>
+
+    </div>
+
+</div>
+
+<div id="quiz"></div>
+
+<button class="submit-btn" onclick="submitQuiz()">
+Submit Quiz
+</button>
+
+</div>
+
+<script>
+
+// ===============================
+// QUESTIONS AREA
+// ===============================
+
+const questions = [
+
+{q:"The Department of Consumer Affairs (DoCA), under the Ministry of Consumer Affairs, Food & Public Distribution (MoCAF&PD), has amended the Consumer Protection (E-Commerce) Rules, 2020 through the Consumer Protection (E-Commerce) (Amendment) Rules, 2026. From when will these amendments become effective?", options:["1 January 2027","1 April 2027","1 January 2026","1 July 2027"], answer:0},
+
+{q:"Under the Consumer Protection (E-Commerce) (Amendment) Rules, 2026, e-commerce entities are required to become convergence partners of which mechanism for consumer grievance redressal?", options:["Central Consumer Protection Authority (CCPA)","National Consumer Helpline (NCH)","Consumer Disputes Redressal Commission (CDRC)","Department of Consumer Affairs Grievance Portal (DCAGP)"], answer:1},
+
+{q:"As per the Consumer Protection (E-Commerce) (Amendment) Rules, 2026, what requirement has been introduced regarding the prior price of a product displayed by an e-commerce entity?", options:["Prior price must be the highest price charged during the preceding 60 days","Prior price must be the average price charged during the preceding 30 days","Prior price must be the lowest price offered during the preceding 30 days","Prior price must be the price charged on the date of the previous sale"], answer:2},
+
+{q:"The Operational Guidelines for Digital India Land Records Modernisation Programme (DILRMP) 3.0 were launched by Union Minister Shivraj Singh Chouhan. What is the budget and implementation period of DILRMP 3.0?", options:["₹565.50 crore for 2026–2031","₹655.50 crore for 2025–2030","₹565.50 crore for 2025–2030","₹755.50 crore for 2026–2031"], answer:0},
+
+{q:"The Digital India Land Records Modernisation Programme (DILRMP) 3.0 aims to create an integrated GIS-based digital land records ecosystem. Which identification system under the programme provides a unique identification number for every land parcel?", options:["15-digit Land Parcel Identification Number (LPIN)","14-digit Unique Land Parcel Identification Number (ULPIN)","12-digit Digital Land Registration Number (DLRN)","16-digit National Land Identification Number (NLIN)"], answer:1},
+
+{q:"Under Digital India Land Records Modernisation Programme (DILRMP) 3.0, which component is associated with GIS-based urban land records and Urban Property Cards?", options:["Revenue Court Case Management System (RCCMS)","Bhu-Aadhaar / Unique Land Parcel Identification Number (ULPIN)","NAKSHA","Registration Seva Kendra (RSK)"], answer:2},
+
+{q:"The National Statistical Office (NSO), under the Ministry of Statistics & Programme Implementation (MoSPI), released its first district-level estimates of the unincorporated sector based on which survey and reference period?", options:["ASUSE 2024 covering April 2024–March 2025","ASUSE 2025 covering January–December 2025","ASUSE 2025 covering April 2025–March 2026","Economic Census 2025 covering January–December 2025"], answer:1},
+
+{q:"According to the National Statistical Office (NSO) report 'Unincorporated Sector at the District Level: Insights from ASUSE 2025', approximately what share of establishments, workers and Gross Value Added (GVA) was accounted for by the top 10 districts?", options:["About one-fifth","About one-fourth","About one-tenth","About one-third"], answer:2},
+
+{q:"The Institute of Teaching and Research in Ayurveda (ITRA) and Heartfulness Institute signed a five-year Memorandum of Understanding (MoU) for preventive and holistic healthcare. Which combination correctly describes the areas proposed for integration?", options:["Ayurveda, yoga, meditation and ecological practices","Ayurveda, biotechnology, genomics and pharmaceutical manufacturing","Yoga, naturopathy, artificial intelligence and medical robotics","Meditation, modern surgery, genomics and biomedical engineering"], answer:0},
+
+{q:"The Institute of Teaching and Research in Ayurveda (ITRA), which signed a five-year MoU with the Heartfulness Institute, has which of the following correct static details?", options:["Located in Jamnagar, Gujarat; Institute of National Importance; under Ministry of AYUSH","Located in Hyderabad, Telangana; deemed university; under Ministry of Health and Family Welfare","Located in New Delhi; autonomous institution; under Ministry of Education","Located in Pune, Maharashtra; Institute of National Importance; under Ministry of Science and Technology"], answer:0},
+
+{q:"The Digital Bharat Nidhi (DBN) and Government of Jharkhand signed an agreement for implementing the Amended BharatNet Programme (ABP) in the state. What is the financial outlay under this agreement?", options:["₹1,486 crore","₹1,684 crore","₹1,864 crore","₹1,648 crore"], answer:1},
+
+{q:"Under the Digital Bharat Nidhi (DBN) agreement for the Amended BharatNet Programme (ABP) in Jharkhand, which implementing Special Purpose Vehicle (SPV) will execute the state-led model?", options:["Jharkhand State Digital Services Corporation (JSDSC)","Jharkhand Broadband Infrastructure Corporation (JBIC)","Jharkhand Digital Infrastructure Corporation Limited (JDICL)","Jharkhand Optical Fibre Development Corporation (JOFDC)"], answer:2},
+
+{q:"BharatNet, originally launched as the National Optical Fibre Network (NOFN), was renamed BharatNet in 2015. What was the original launch year of the National Optical Fibre Network (NOFN)?", options:["2010","2011","2012","2015"], answer:1},
+
+{q:"The India Photonics Association (IPA) was launched at the India Habitat Centre, New Delhi, to promote innovation, industry collaboration and policy support in photonics. According to the given details, what was the estimated global photonics market size in 2025?", options:["USD 68.4 billion","USD 78.4 billion","USD 87.4 billion","USD 88.4 billion"], answer:1},
+
+{q:"Photonics is a technology centred on the use of light. Which of the following best describes photonics as mentioned in the India Photonics Association (IPA) launch details?", options:["Technology involving generation, manipulation and detection of light","Technology involving only semiconductor fabrication and chip packaging","Technology involving transmission of electricity through optical conductors","Technology involving generation and storage of electrical energy through photovoltaic cells"], answer:0},
+
+{q:"The National Institute of Electronics and Information Technology (NIELIT) partnered with Saylor University, USA, to integrate digital learning resources into NIELIT Digital University (NDU). Which Union Ministry is NIELIT associated with?", options:["Ministry of Communications","Ministry of Skill Development and Entrepreneurship","Ministry of Electronics & Information Technology (MeitY)","Ministry of Education"], answer:2},
+
+{q:"The National Institute of Electronics and Information Technology (NIELIT) has several important static details. Which of the following combinations is correct?", options:["Established in 1989; deemed-to-be University status in 2023; main campus at Ropar, Punjab","Established in 1991; deemed-to-be University status in 2022; main campus at Bengaluru, Karnataka","Established in 1989; university status in 2021; main campus at Hyderabad, Telangana","Established in 1995; deemed-to-be University status in 2023; main campus at Noida, Uttar Pradesh"], answer:0},
+
+{q:"The 79th WHO Regional Committee (RC79) for South-East Asia was held from 7–10 September 2026 in Dili, Timor-Leste. Who chaired the session?", options:["JP Nadda, Union Minister of Health and Family Welfare, India","Dr. Tedros Adhanom Ghebreyesus, Director-General, WHO","Dr. Elia dos Reis Amaral, Health Minister of Timor-Leste","Dr. Saia Ma'u Piukala, WHO Regional Director for South-East Asia"], answer:2},
+
+{q:"At the 79th WHO Regional Committee (RC79) for South-East Asia, India was recognised by the World Health Organization (WHO) for sustaining the elimination of Maternal & Neonatal Tetanus (MNTE). Which additional achievement was highlighted regarding non-communicable diseases (NCDs)?", options:["94 million people with hypertension/diabetes were placed on standard care by December 2025 against a target of 75 million","75 million people with hypertension/diabetes were placed on standard care by December 2025 against a target of 94 million","94 million people were vaccinated against tuberculosis by December 2025 against a target of 75 million","75 million people with hypertension/diabetes were screened by December 2025 against a target of 94 million"], answer:0},
+
+{q:"The 79th WHO Regional Committee (RC79) adopted the Dili Declaration on Human Resources for Health: Equity in Specialized Care. Which of the following was among the key resolutions discussed at the session?", options:["TB elimination by 2035, medical tourism and pharmaceutical exports","TB elimination by 2030, medical devices, diagnostics, patient/blood safety, viral hepatitis, HIV and STIs","Universal health insurance by 2030, vaccine exports and genomic surveillance only","TB elimination by 2028, medical education reforms and pharmaceutical pricing"], answer:1},
+
+{q:"Which of the following correctly matches the organisation with its headquarters and establishment year based on the given details?", options:["World Health Organization (WHO) – Geneva, Switzerland – 1948","National Institute of Electronics and Information Technology (NIELIT) – Geneva, Switzerland – 1948","Institute of Teaching and Research in Ayurveda (ITRA) – New Delhi – 1989","National Consumer Helpline (NCH) – Geneva, Switzerland – 1948"], answer:0},
+
+{q:"The 22nd edition of Exercise Yudh Abhyas 2026 is being conducted jointly by the Indian Army and United States (US) Army from 9–28 September 2026. Which combination correctly describes the locations of the exercise?", options:["Bikaner, Rajasthan and Auli, Uttarakhand","Jaisalmer, Rajasthan and Dehradun, Uttarakhand","Bikaner, Rajasthan and Leh, Ladakh","Jodhpur, Rajasthan and Auli, Uttarakhand"], answer:0},
+
+{q:"Exercise Yudh Abhyas 2026 between the Indian Army and United States (US) Army focuses on interoperability, operational readiness and battlefield technology cooperation. Under which framework is the exercise conducted?", options:["Operation Samudra Shakti","Operation Pathways","Operation Vajra Prahar","Operation Mountain Strike"], answer:1},
+
+{q:"The 22nd edition of Exercise Yudh Abhyas 2026 includes Command Post Exercise (CPX), Field Training Exercise (FTX) and a live-fire demonstration. Which country partnered with India in this exercise?", options:["France","Australia","United States","United Kingdom"], answer:2},
+
+{q:"The previous edition of Exercise Yudh Abhyas was held in 2025. Where was the 2025 edition conducted?", options:["Fort Wainwright, Alaska, USA","Bikaner, Rajasthan, India","Auli, Uttarakhand, India","Fort Bragg, North Carolina, USA"], answer:0},
+
+{q:"Axis Bank conducted the 4th edition of Sparsh Week 2026 across India from 7–11 September 2026. What was the theme of this customer-focused initiative?", options:["Customer First, Digital Always","Act with Speed","Banking Beyond Boundaries","Faster Banking, Better Banking"], answer:1},
+
+{q:"During Axis Bank's Sparsh Week 2026, which service feature was highlighted as part of the bank's effort to improve customer experience and provide faster service?", options:["Home loans disbursed within 24 hours through branch-only processing","Digital auto and two-wheeler loan disbursement within 30 minutes","Instant credit-card approval within 5 minutes for all customers","Digital personal-loan disbursement within 10 minutes without verification"], answer:1},
+
+{q:"Axis Bank's Sparsh Week 2026 targeted more than 2.5 lakh customer interactions across India. Which of the following correctly states the static details of Axis Bank?", options:["Headquarters: Mumbai; Established: 1993; MD & CEO: Amitabh Chaudhry","Headquarters: Pune; Established: 1994; MD & CEO: Shikha Sharma","Headquarters: Mumbai; Established: 1993; MD & CEO: Sandeep Bakhshi","Headquarters: Ahmedabad; Established: 1994; MD & CEO: Amitabh Chaudhry"], answer:0},
+
+{q:"On 3 August 2026, the Reserve Bank of India (RBI) authorised Pluxee India to operate as a Payment Aggregator. Which combination correctly identifies the licences granted?", options:["PA-O and PPI","PA-P and BBPOU","PA-O and PA-P","PPI and PA-CB"], answer:2},
+
+{q:"The Reserve Bank of India (RBI) authorised Pluxee India as a Payment Aggregator on 3 August 2026, enabling merchant onboarding and payment processing through cards, QR, Near Field Communication (NFC) and online payments. What was Pluxee India's earlier relevant licence history?", options:["It held a PPI licence since 2009, which was expanded in 2020","It held a PA-O licence since 2009, which was expanded in 2020","It received its first PPI licence in 2015 and expanded it in 2022","It received its first PA-P licence in 2020 and expanded it in 2026"], answer:0},
+
+{q:"The 16th Sansad Ratna Awards 2026 were held in New Delhi to recognise outstanding parliamentary performance. P.P. Chaudhary, Lok Sabha MP from Pali, received the award for the fourth time. Which additional position was associated with him?", options:["Chairman of the Public Accounts Committee","Chairman of the Joint Parliamentary Committee on One Nation One Election (ONOE)","Chairman of the Estimates Committee","Chairman of the Parliamentary Standing Committee on Finance"], answer:1},
+
+{q:"The Sansad Ratna Awards 2026 evaluated parliamentary performance using parameters such as attendance, questions, debates, Private Member Bills and legislative contribution. Which combination correctly represents the categories of awardees mentioned?", options:["8 Lok Sabha MPs + 4 Rajya Sabha MPs + 4 Parliamentary Standing Committees","10 Lok Sabha MPs + 2 Rajya Sabha MPs + 4 Parliamentary Standing Committees","10 Lok Sabha MPs + 4 Rajya Sabha MPs + 2 Parliamentary Standing Committees","12 Lok Sabha MPs + 2 Rajya Sabha MPs + 6 Parliamentary Standing Committees"], answer:1},
+
+{q:"The Indian Space Research Organisation (ISRO) conducted a flight acceptance hot test of the CE20 cryogenic engine at Mahendragiri, Tamil Nadu. What was the thrust level of the engine tested for the Launch Vehicle Mark-3 (LVM3)?", options:["180 kN","200 kN","220 kN","240 kN"], answer:2},
+
+{q:"The CE20 cryogenic engine tested by the Indian Space Research Organisation (ISRO) uses which combination of propellants?", options:["Liquid Oxygen (LOX) and Liquid Hydrogen (LH2)","Liquid Oxygen (LOX) and Kerosene","Liquid Hydrogen (LH2) and Methane","Liquid Nitrogen and Liquid Hydrogen (LH2)"], answer:0},
+
+{q:"During the CE20 cryogenic engine test, the Indian Space Research Organisation (ISRO) also demonstrated the Liquid Oxygen (LOX) Tank Pressurisation Module (LTPM), which is relevant to which major Indian human-spaceflight programme?", options:["Chandrayaan-4","Aditya-L1","Gaganyaan","Mangalyaan-2"], answer:2},
+
+{q:"Veteran Tamil scholar, orator and Padma Shri awardee Solomon Pappaiah passed away at the age of 90. He was particularly associated with Pattimandram and had conducted more than 12,000 debates. In which year did he receive the Padma Shri?", options:["2019","2020","2021","2022"], answer:2},
+
+{q:"Solomon Pappaiah, who served as Head of the Department of Tamil at American College, Madurai, from 1961 to 1994, received the Kalaimamani award from the Tamil Nadu Government in which year?", options:["1998","2000","2002","2005"], answer:1},
+
+{q:"Himalaya Diwas is observed annually on 9 September to create awareness about conservation of the Himalayan ecosystem. Which statement correctly describes its history?", options:["First observed in 2010 in Uttarakhand and officially declared in 2014 by Chief Minister Harish Rawat","First observed in 2012 in Himachal Pradesh and officially declared in 2015 by Chief Minister Harish Rawat","First observed in 2010 in Uttarakhand and officially declared in 2015 by the Union Government","First observed in 2014 in Uttarakhand and officially recognised in 2016 by the Union Government"], answer:0},
+
+{q:"World Electric Vehicle (EV) Day 2026 was observed on 9 September with the theme 'Switching Electric: driving down the cost of motoring'. Which combination correctly identifies its founding details?", options:["Founded in 2019 by ABB; partnered with Green.TV","Founded in 2020 by Ade Thomas of Green.TV; partnered with ABB","Founded in 2020 by Green.TV and ABB jointly; founder Ade Thomas","Founded in 2021 by Ade Thomas of ABB; partnered with Green.TV"], answer:1},
+
+{q:"At the Odisha Investors' Meet 2026 in Abu Dhabi, UAE, the Government of Odisha signed agreements with International Holding Company (IHC) and the Adani Group to explore 14 projects involving a proposed investment of ₹2,10,500 crore. Which project received the largest investment allocation among the major projects listed?", options:["Coal-to-Chemicals Complex","Mineral Processing Chain","Renewable Energy Platform ","AI Data Centre Hub"], answer:3},
+
+{q:"The Government of Odisha, International Holding Company (IHC) and Adani Group identified several sectors for potential investment under the Odisha Investors' Meet 2026 agreements. Which of the following was NOT among the other areas specifically mentioned?", options:["Shipbuilding and petrochemicals","Rare earths and healthcare","Ports, SEZs, agro-processing and skilling","Nuclear power generation and space-launch infrastructure"], answer:3},
+
+];
+
+
+
+// ===============================
+// VARIABLES
+// ===============================
+
+let userAnswers = new Array(questions.length).fill(null);
+
+let markedForReview = new Array(questions.length).fill(false);
+
+let submitted = false;
+
+// ===============================
+// LOAD QUIZ
+// ===============================
+
+function loadQuiz(){
+
+    const quizDiv = document.getElementById("quiz");
+
+    questions.forEach((question,index)=>{
+
+        const qDiv = document.createElement("div");
+
+        qDiv.classList.add("question");
+
+        qDiv.id = `question_${index}`;
+
+        qDiv.innerHTML = `
+        <h3>Q${index+1}. ${question.q}</h3>
+        `;
+
+        question.options.forEach((option,optIndex)=>{
+
+            const opt = document.createElement("div");
+
+            opt.classList.add("option");
+
+            opt.innerText = option;
+
+            opt.onclick = ()=>selectOption(index,optIndex,opt);
+
+            opt.id = `q${index}_opt${optIndex}`;
+
+            qDiv.appendChild(opt);
+
+        });
+
+        // MARK BUTTON
+
+        const markBtn = document.createElement("button");
+
+        markBtn.innerText = "Mark For Review";
+
+        markBtn.classList.add("mark-btn");
+
+        markBtn.onclick = ()=>toggleMark(index,markBtn);
+
+        qDiv.appendChild(markBtn);
+
+        // CLEAR BUTTON
+
+        const clearBtn = document.createElement("button");
+
+        clearBtn.innerText = "Clear";
+
+        clearBtn.classList.add("clear-btn");
+
+        clearBtn.onclick = ()=>clearAnswer(index);
+
+        qDiv.appendChild(clearBtn);
+
+        quizDiv.appendChild(qDiv);
+
+    });
+
+}
+
+// ===============================
+// SELECT OPTION
+// ===============================
+
+function selectOption(qIndex,optIndex,element){
+
+    if(submitted) return;
+
+    userAnswers[qIndex] = optIndex;
+
+    const options = document.querySelectorAll(`[id^="q${qIndex}_opt"]`);
+
+    options.forEach(opt=>{
+        opt.classList.remove("selected");
+    });
+
+    element.classList.add("selected");
+
+}
+
+// ===============================
+// MARK FOR REVIEW
+// ===============================
+
+function toggleMark(index,button){
+
+    markedForReview[index] = !markedForReview[index];
+
+    const questionBox = document.getElementById(`question_${index}`);
+
+    if(markedForReview[index]){
+
+        button.classList.add("marked");
+
+        button.innerText = "Marked For Review";
+
+        questionBox.classList.add("review-marked");
+
+    }else{
+
+        button.classList.remove("marked");
+
+        button.innerText = "Mark For Review";
+
+        questionBox.classList.remove("review-marked");
+
+    }
+
+}
+
+// ===============================
+// CLEAR ANSWER
+// ===============================
+
+function clearAnswer(index){
+
+    if(submitted) return;
+
+    userAnswers[index] = null;
+
+    const options = document.querySelectorAll(`[id^="q${index}_opt"]`);
+
+    options.forEach(opt=>{
+        opt.classList.remove("selected");
+    });
+
+}
+
+// ===============================
+// SUBMIT QUIZ
+// ===============================
+
+function submitQuiz(){
+
+    if(submitted) return;
+
+    submitted = true;
+
+    clearInterval(timer);
+
+    let score = 0;
+
+    let correctCount = 0;
+    let wrongCount = 0;
+    let unansweredCount = 0;
+
+    questions.forEach((question,index)=>{
+
+        const userAns = userAnswers[index];
+
+        if(userAns === null){
+
+            unansweredCount++;
+
+        }
+        else if(userAns === question.answer){
+
+            score += 1;
+            correctCount++;
+
+        }
+        else{
+
+            score -= 0.25;
+            wrongCount++;
+
+        }
+
+    });
+
+    let attempted = correctCount + wrongCount;
+
+    let accuracy = attempted > 0
+    ? ((correctCount/attempted)*100).toFixed(2)
+    : 0;
+
+    document.body.innerHTML = `
+
+    <div class="container">
+
+        <div class="result-box">
+
+            <h1>Quiz Submitted ✅</h1>
+
+            <h2>Total Score: ${score.toFixed(2)}</h2>
+
+            <h3>Correct Answers: ${correctCount}</h3>
+
+            <h3>Wrong Answers: ${wrongCount}</h3>
+
+            <h3>Unanswered Questions: ${unansweredCount}</h3>
+
+            <h3>Accuracy: ${accuracy}%</h3>
+
+            <button class="review-btn" onclick="reviewAnswers()">
+            Review Answers
+            </button>
+
+            <div id="reviewSection"></div>
+
+        </div>
+
+    </div>
+
+    `;
+
+}
+
+// ===============================
+// REVIEW ANSWERS
+// ===============================
+
+function reviewAnswers(){
+
+    const reviewSection = document.getElementById("reviewSection");
+
+    let html = `<h1 style="margin-top:40px;">Review Section</h1>`;
+
+    questions.forEach((question,index)=>{
+
+        const userAns = userAnswers[index];
+
+        let status = "";
+        let marks = "";
+
+        if(userAns === null){
+
+            status = `<span class="unanswered">Unanswered</span>`;
+            marks = `0 Marks`;
+
+        }
+        else if(userAns === question.answer){
+
+            status = `<span class="correct">Correct ✅</span>`;
+            marks = `+1 Mark`;
+
+        }
+        else{
+
+            status = `<span class="wrong">Wrong ❌</span>`;
+            marks = `-0.25 Mark`;
+
+        }
+
+        html += `
+
+        <div class="review-question">
+
+            <h3>Q${index+1}. ${question.q}</h3>
+
+            <p>${status}</p>
+
+            <p><b>Marks:</b> ${marks}</p>
+
+            <p>
+            <b>Your Answer:</b>
+            ${
+                userAns === null
+                ? "Not Attempted"
+                : question.options[userAns]
+            }
+            </p>
+
+            <div class="correct-answer">
+            <b>Correct Answer:</b>
+            ${question.options[question.answer]}
+            </div>
+
+        </div>
+
+        `;
+
+    });
+
+    reviewSection.innerHTML = html;
+
+}
+
+// ===============================
+// TIMER
+// ===============================
+
+let time = 1800;
+
+let timer;
+
+let isPaused = false;
+
+function startTimer(){
+
+    timer = setInterval(()=>{
+
+        if(!isPaused){
+
+            let minutes = Math.floor(time/60);
+
+            let seconds = time%60;
+
+            document.getElementById("timer").innerText =
+            `Time Left: ${minutes}:${seconds < 10 ? '0'+seconds : seconds}`;
+
+            time--;
+
+            if(time < 0){
+
+                clearInterval(timer);
+
+                alert("Time is up! Quiz auto-submitted.");
+
+                submitQuiz();
+
+            }
+
+        }
+
+    },1000);
+
+}
+
+// ===============================
+// PAUSE TIMER
+// ===============================
+
+function pauseTimer(){
+
+    if(submitted) return;
+
+    isPaused = true;
+
+    document.getElementById("pauseBtn").disabled = true;
+
+    document.getElementById("resumeBtn").disabled = false;
+
+    // Disable options
+    document.querySelectorAll(".option").forEach(opt=>{
+        opt.classList.add("disabled-option");
+    });
+
+    // Disable buttons
+    document.querySelectorAll(".mark-btn, .clear-btn").forEach(btn=>{
+        btn.disabled = true;
+        btn.classList.add("disabled-btn");
+    });
+
+}
+// ===============================
+// RESUME TIMER
+// ===============================
+
+function resumeTimer(){
+
+    if(submitted) return;
+
+    isPaused = false;
+
+    document.getElementById("pauseBtn").disabled = false;
+
+    document.getElementById("resumeBtn").disabled = true;
+
+    // Enable options
+    document.querySelectorAll(".option").forEach(opt=>{
+        opt.classList.remove("disabled-option");
+    });
+
+    // Enable buttons
+    document.querySelectorAll(".mark-btn, .clear-btn").forEach(btn=>{
+        btn.disabled = false;
+        btn.classList.remove("disabled-btn");
+    });
+
+}
+// ===============================
+
+loadQuiz();
+
+startTimer();
+
+</script>
+
+</body>
+</html>
